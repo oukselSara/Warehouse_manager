@@ -1,0 +1,13 @@
+# Create .gitignore
+echo "# Sensitive files" > .gitignore
+echo "serviceAccountKey.json" >> .gitignore
+echo "" >> .gitignore
+echo "# Build files" >> .gitignore
+echo "target/" >> .gitignore
+echo "" >> .gitignore
+echo "# IDE files" >> .gitignore
+echo ".vscode/" >> .gitignore
+echo "" >> .gitignore
+echo "# Log files" >> .gitignore
+echo "*.log" >> .gitignore
+echo "*.lck" >> .gitignore

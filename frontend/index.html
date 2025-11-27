@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Warehouse Monitoring System</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen" class="screen active">
+        <div class="login-container">
+            <div class="logo">
+                <svg width="60" height="60" viewBox="0 0 60 60" fill="none">
+                    <rect x="5" y="15" width="50" height="35" stroke="#2563eb" stroke-width="2" fill="none"/>
+                    <path d="M5 15 L30 5 L55 15" stroke="#2563eb" stroke-width="2" fill="none"/>
+                    <rect x="20" y="25" width="8" height="15" fill="#2563eb"/>
+                    <rect x="32" y="25" width="8" height="15" fill="#2563eb"/>
+                </svg>
+            </div>
+            <h1>Warehouse Monitor</h1>
+            <p class="subtitle">Enterprise Food Storage Management</p>
+            
+            <div class="auth-tabs">
+                <button class="auth-tab active" onclick="switchTab('login')">Sign In</button>
+                <button class="auth-tab" onclick="switchTab('signup')">Sign Up</button>
+            </div>
+
+            <form id="loginForm" class="auth-form">
+                <div class="input-group">
+                    <label>Email</label>
+                    <input type="email" id="loginEmail" required placeholder="your@email.com">
+                </div>
+                <div class="input-group">
+                    <label>Password</label>
+                    <input type="password" id="loginPassword" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="btn-primary">Sign In</button>
+                <div id="loginError" class="error-message"></div>
+            </form>
+
+            <form id="signupForm" class="auth-form" style="display: none;">
+                <div class="input-group">
+                    <label>Full Name</label>
+                    <input type="text" id="signupName" required placeholder="Your Full Name">
+                </div>
+                <div class="input-group">
+                    <label>Email</label>
+                    <input type="email" id="signupEmail" required placeholder="your@email.com">
+                </div>
+                <div class="input-group">
+                    <label>Role</label>
+                    <select id="signupRole" required>
+                        <option value="">Select your role...</option>
+                        <option value="admin">Admin - Full system access</option>
+                        <option value="operator">Operator - Add/edit warehouses</option>
+                        <option value="viewer">Viewer - View-only access</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Password</label>
+                    <input type="password" id="signupPassword" required placeholder="••••••••">
+                </div>
+                <div class="input-group">
+                    <label>Confirm Password</label>
+                    <input type="password" id="signupConfirmPassword" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="btn-primary">Create Account</button>
+                <div id="signupError" class="error-message"></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Dashboard Screen -->
+    <div id="dashboardScreen" class="screen">
+        <nav class="navbar">
+            <div class="nav-brand">
+                <svg width="40" height="40" viewBox="0 0 60 60" fill="none">
+                    <rect x="5" y="15" width="50" height="35" stroke="white" stroke-width="2" fill="none"/>
+                    <path d="M5 15 L30 5 L55 15" stroke="white" stroke-width="2" fill="none"/>
+                </svg>
+                <span>Warehouse Monitor</span>
+            </div>
+            <div class="nav-actions">
+                <div style="display: flex; flex-direction: column; align-items: flex-end; margin-right: 20px;">
+                    <span id="userName" class="user-name"></span>
+                    <span id="userRoleBadge" style="margin-top: 4px;"></span>
+                </div>
+                <button id="manageUsersBtn" onclick="showUserManagementModal()" class="btn-secondary" style="display: none;">Manage Users</button>
+                <button onclick="logout()" class="btn-secondary" style="margin-left: 12px;">Logout</button>
+            </div>
+        </nav>
+
+        <div class="dashboard-container">
+            <div class="dashboard-header">
+                <h2>Warehouse Overview</h2>
+                <button onclick="showAddWarehouseModal()" class="btn-primary">+ Add Warehouse</button>
+            </div>
+
+            <div id="alertsContainer" class="alerts-container"></div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">🏭</div>
+                    <div class="stat-info">
+                        <div class="stat-label">Total Warehouses</div>
+                        <div class="stat-value" id="totalWarehouses">0</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-info">
+                        <div class="stat-label">Normal Status</div>
+                        <div class="stat-value" id="normalCount">0</div>
+                    </div>
+                </div>
+                <div class="stat-card alert-stat">
+                    <div class="stat-icon">⚠️</div>
+                    <div class="stat-info">
+                        <div class="stat-label">Alerts</div>
+                        <div class="stat-value" id="alertCount">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="charts-container">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3>Temperature Trends</h3>
+                        <select id="tempChartWarehouse" onchange="updateTemperatureChart()" class="chart-select">
+                            <option value="">Select warehouse...</option>
+                        </select>
+                    </div>
+                    <canvas id="temperatureChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3>Humidity Trends</h3>
+                        <select id="humidityChartWarehouse" onchange="updateHumidityChart()" class="chart-select">
+                            <option value="">Select warehouse...</option>
+                        </select>
+                    </div>
+                    <canvas id="humidityChart"></canvas>
+                </div>
+            </div>
+
+            <div class="charts-container" style="grid-template-columns: 1fr;">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3>Warehouse Status Overview</h3>
+                    </div>
+                    <canvas id="statusChart" style="max-height: 300px;"></canvas>
+                </div>
+            </div>
+
+            <h3 style="color: #1e293b; margin: 30px 0 20px 0; font-size: 24px;">Your Warehouses</h3>
+            <div id="warehousesGrid" class="warehouses-grid"></div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Warehouse Modal -->
+    <div id="addWarehouseModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="warehouseModalTitle">Add New Warehouse</h3>
+                <button onclick="closeAddWarehouseModal()" class="close-btn">&times;</button>
+            </div>
+            <form id="addWarehouseForm">
+                <input type="hidden" id="editWarehouseId" value="">
+                <div class="input-group">
+                    <label>Warehouse Name</label>
+                    <input type="text" id="warehouseName" required placeholder="e.g., North Storage Facility">
+                </div>
+                <div class="input-group">
+                    <label>Location</label>
+                    <input type="text" id="warehouseLocation" required placeholder="e.g., Chicago, IL">
+                </div>
+                <div class="input-group">
+                    <label>Storage Type</label>
+                    <select id="warehouseType" required>
+                        <option value="">Select type...</option>
+                        <option value="Frozen">Frozen Foods</option>
+                        <option value="Vegetables">Fresh Vegetables</option>
+                        <option value="Meat">Meat Products</option>
+                        <option value="Dairy">Dairy Products</option>
+                        <option value="Mixed">Mixed Storage</option>
+                    </select>
+                </div>
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>Min Temp (°C)</label>
+                        <input type="number" id="minTemp" required value="-18" step="0.1">
+                    </div>
+                    <div class="input-group">
+                        <label>Max Temp (°C)</label>
+                        <input type="number" id="maxTemp" required value="-15" step="0.1">
+                    </div>
+                </div>
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>Min Humidity (%)</label>
+                        <input type="number" id="minHumidity" required value="40" step="1">
+                    </div>
+                    <div class="input-group">
+                        <label>Max Humidity (%)</label>
+                        <input type="number" id="maxHumidity" required value="60" step="1">
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" onclick="closeAddWarehouseModal()" class="btn-secondary">Cancel</button>
+                    <button type="submit" class="btn-primary" id="warehouseSubmitBtn">Add Warehouse</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- User Management Modal -->
+    <div id="userManagementModal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h3>User Management</h3>
+                <button onclick="closeUserManagementModal()" class="close-btn">&times;</button>
+            </div>
+            <div style="padding: 24px;">
+                <div style="background: #eff6ff; border-left: 4px solid #2563eb; padding: 16px; border-radius: 6px; margin-bottom: 20px;">
+                    <p style="color: #1e40af; font-size: 14px; margin: 0;">
+                        <strong>Role Permissions:</strong><br>
+                        <strong>Admin:</strong> Full access - manage users, add/edit/delete warehouses<br>
+                        <strong>Operator:</strong> Add/edit warehouses, acknowledge alerts<br>
+                        <strong>Viewer:</strong> View-only access to all warehouses and reports
+                    </p>
+                </div>
+                <div id="usersList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Warehouse Detail Modal -->
+    <div id="warehouseDetailModal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h3 id="detailWarehouseName"></h3>
+                <button onclick="closeDetailModal()" class="close-btn">&times;</button>
+            </div>
+            <div id="warehouseDetailContent"></div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
